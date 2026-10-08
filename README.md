@@ -1,36 +1,45 @@
 # PQC-AQ
 
-Welcome to PQC-AQ! This repository contains resources and implementations related to post-quantum cryptography and quantum algorithms.
+Resources and implementations related to post-quantum cryptography (Kyber / ML-KEM,
+Dilithium / ML-DSA) and quantum algorithms.
 
-## Overview
+> **Visibility:** this repository is currently **public**. Only commit material approved
+> for public release. Proprietary Accelequant code, internal research, credentials and
+> data belong in a private company repository.
 
-This project focuses on exploring and implementing post-quantum cryptographic algorithms and quantum computing concepts.
+## Layout
 
-## Getting Started
+| Path | Contents |
+|---|---|
+| `src/pqc/` | Library code: `common`, `kyber`, `mlkem`, `dilithium`, `mldsa` |
+| `experiments/` | Per-scheme experiments and `benchmarks/` |
+| `scripts/` | `benchmarking`, `data_processing`, `plotting`, `utilities` |
+| `notebooks/` | Exploratory notebooks |
+| `tests/` | Test suite |
+| `configs/` | Experiment configuration |
+| `docs/` | `technical`, `meeting-notes`, `project-plans`, `architecture` |
+| `literature/` | `bibliography.bib`, `reading-list.md`, `notes/` |
+| `papers/manuscript/` | Manuscript sources |
+| `presentations/` | Slides |
+| `environment/` | `requirements*.txt`, `environment.yml` |
 
-To get started with this project, clone the repository and follow the setup instructions in the relevant subdirectories.
+Empty folders hold a `.gitkeep`; delete it once real files are added.
 
-```bash
-git clone https://github.com/108AQ/PQC-AQ.git
-cd PQC-AQ
+## Branches
+
+`main` is the integrated project. `prajjwal-dev` and `manish-dev` are personal
+development branches, merged into `main` via pull request. See `CONTRIBUTING.md`.
+
+## Server layout (EC2)
+
+```
+~/prajjwal-dev/PQC-AQ/        Git clone (prajjwal-dev)
+~/manish-dev/project_pqc/PQC-AQ/  Git clone (manish-dev)
+/shared/project_pqc/          (planned) papers, datasets, experiment-results, artifacts, archives
 ```
 
-## Structure
+Large files stay on the server, not in Git.
 
-The repository is organized into the following sections:
-- **docs**: Documentation and research papers
-- **src**: Source code implementations
-- **tests**: Test suites for implementations
+## Setup / running / reproducing experiments
 
-## Contributing
-
-Contributions are welcome! Please feel free to open issues or submit pull requests.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contact
-
-For questions or inquiries, please open an issue in the repository.
---Hi, this is commit op
+TODO: fill in once `environment/` and the first experiment exist.
