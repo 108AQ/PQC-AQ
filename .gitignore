@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# LaTeX byproducts
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Large / generated material lives outside Git (see README)
+data/
+results/
+artifacts/
+scratch/
+papers/*.pdf
+*.zip
+*.tar.gz
+
+# Secrets
+.env
+*.pem
+*.key
