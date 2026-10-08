@@ -1,7 +1,6 @@
 # PQC-AQ
 
-Resources and implementations related to post-quantum cryptography (Kyber / ML-KEM,
-Dilithium / ML-DSA) and quantum algorithms.
+Resources and implementations focused on three topics: **Kyber**, **ML-KEM** and **dLIN**.
 
 > **Visibility:** this repository is currently **public**. Only commit material approved
 > for public release. Proprietary Accelequant code, internal research, credentials and
@@ -11,8 +10,8 @@ Dilithium / ML-DSA) and quantum algorithms.
 
 | Path | Contents |
 |---|---|
-| `src/pqc/` | Library code: `common`, `kyber`, `mlkem`, `dilithium`, `mldsa` |
-| `experiments/` | Per-scheme experiments and `benchmarks/` |
+| `src/pqc/` | Library code: `common`, `kyber`, `mlkem`, `dLIN` |
+| `experiments/` | Per-topic experiments (`kyber`, `mlkem`, `dLIN`) and `benchmarks/` |
 | `scripts/` | `benchmarking`, `data_processing`, `plotting`, `utilities` |
 | `notebooks/` | Exploratory notebooks |
 | `tests/` | Test suite |
