@@ -1,0 +1,1127 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{listings}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    citecolor=blue!60!black,
+    urlcolor=blue!60!black
+}
+
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\wt}{\operatorname{wt}}
+\newcommand{\Image}{\operatorname{Im}}
+\newcommand{\Ber}{\mathrm{Ber}}
+\newcommand{\U}{\mathcal{U}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\Pr}
+\newcommand{\Z}{\mathbb{Z}}
+
+\title{\textbf{Understanding the d-LIN Problem}\\
+\large Sparse Noisy Linear Equations over $\mathbb{F}_2$}
+\author{Prajjwal Saxena (with the help of GPT 5.6 Luna)}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{The Basic Idea}
+
+The central d-LIN equation is\begin{equation}
+    \boxed{b = Mx + e}
+    \label{eq:main}
+\end{equation}
+
+where the arithmetic is performed over the binary field \[
+    \F_2 = \{0,1\}.
+\]
+
+The objects are:
+\begin{itemize}
+    \item $M$: a random $d$-sparse matrix;
+    \item $x$: a hidden binary assignment;
+    \item $e$: a random noise vector;
+    \item $b$: the observed right-hand-side vector.
+\end{itemize}
+
+The essential intuition is:
+\textbf{\[
+\text{d-LIN} =
+\text{sparse linear equations}
++
+\text{noise}
+\quad\text{(over) }\F_2.
+\]}
+
+Without the noise $e$, the problem is ordinary linear algebra and can
+be solved efficiently. 
+
+% ============================================================
+
+\section{The Binary Field \texorpdfstring{$\F_2$}{F2}}
+The field $\F_2$ contains only
+\[
+    \F_2 = \{0,1\}.
+\]
+Addition is modulo $2$:\begin{align}
+0+0 &= 0,\\
+0+1 &= 1,\\
+1+0 &= 1,\\
+1+1 &= 0.
+\end{align}
+
+Thus addition in $\F_2$ is equivalent to XOR: \begin{equation}
+    a+b \pmod 2 = a\oplus b.
+\end{equation}
+
+Subtraction is also the same as addition:\begin{equation}
+    a-b = a+b \pmod 2.
+\end{equation}
+
+Consequently, a linear equation such as\begin{equation}
+    x_1+x_4+x_7 = 1
+\end{equation}
+
+can equivalently be written as\begin{equation}
+    x_1\oplus x_4\oplus x_7 = 1.
+\end{equation}
+This makes d-LIN a natural binary parity or XOR constraint problem.
+
+% ============================================================
+\section{What Is a d-LIN Instance?}
+An instance with \textbf{$m$ clauses} and $n$ \textbf{variables} consists of\begin{equation}
+    M\in\F_2^{m\times n}
+\end{equation}
+and
+\begin{equation}
+    b\in\F_2^m.
+\end{equation}
+The unknown assignment is
+\begin{equation}
+    x=
+    \begin{pmatrix}
+    x_1\\
+    x_2\\
+    \vdots\\
+    x_n
+    \end{pmatrix}
+    \in\F_2^n.
+\end{equation}
+The $m$ rows of $M$ correspond to the $m$ clauses.
+
+% ------------------------------------------------------------
+
+
+\subsection{The Meaning of \texorpdfstring{$m$}{m}}
+The integer $m$ is the number of equations or clauses.
+
+For example, $m=4$ means that there are four constraints:\begin{align}
+C_1 &: \quad \text{first equation},\\
+C_2 &: \quad \text{second equation},\\
+C_3 &: \quad \text{third equation},\\
+C_4 &: \quad \text{fourth equation}.
+\end{align}
+
+% ------------------------------------------------------------
+
+
+\subsection{The Meaning of \texorpdfstring{$n$}{n}}
+
+The integer $n$ is the number of binary variables:
+
+\begin{equation}
+    x_1,x_2,\ldots,x_n\in\{0,1\}.
+\end{equation}
+
+There are therefore $2^{n}$ possible assignments.
+
+
+% ============================================================
+
+
+\section{What Does d-Sparse Mean?}
+
+A matrix $M$ is called $d$-sparse in the ABW09 setting when every
+row contains exactly $d$ ones.
+
+For example, a $3$-sparse matrix can be
+
+\begin{equation}
+M =
+\begin{pmatrix}
+1&1&0&1&0\\
+0&1&1&0&1\\
+1&0&1&1&0\\
+0&1&0&1&1
+\end{pmatrix}.
+\end{equation}
+
+Every row contains exactly three $1$s.
+
+The first row,
+
+\[
+(1,1,0,1,0),
+\]
+
+represents the equation
+
+\begin{equation}
+    x_1+x_2+x_4=b_1.
+\end{equation}
+
+The second row represents
+
+\begin{equation}
+    x_2+x_3+x_5=b_2.
+\end{equation}
+
+Thus, for $d=3$,
+
+\begin{equation}
+    \text{3-LIN is a collection of 3-variable XOR equations.}
+\end{equation}
+
+The zero entries mean that the corresponding variable does not
+participate in that clause.
+
+% ============================================================
+\section{Matrix Form of the Clauses}
+
+Let
+
+\begin{equation}
+M =
+\begin{pmatrix}
+M_{11}&M_{12}&\cdots&M_{1n}\\
+M_{21}&M_{22}&\cdots&M_{2n}\\
+\vdots&\vdots&\ddots&\vdots\\
+M_{m1}&M_{m2}&\cdots&M_{mn}
+\end{pmatrix}.
+\end{equation}
+
+Then
+
+\begin{equation}
+Mx =
+\begin{pmatrix}
+\sum_{j=1}^n M_{1j}x_j\\
+\sum_{j=1}^n M_{2j}x_j\\
+\vdots\\
+\sum_{j=1}^n M_{mj}x_j
+\end{pmatrix}.
+\end{equation}
+
+Each row gives one clause.
+
+For example,
+
+\begin{equation}
+M_1=(1,1,0,1,0)
+\end{equation}
+
+gives
+
+\begin{equation}
+M_1x=x_1+x_2+x_4.
+\end{equation}
+
+Therefore
+
+\begin{equation}
+Mx=b
+\end{equation}
+
+is simply a compact representation of all $m$ equations.
+
+% ============================================================
+\section{Exact Satisfiability}
+
+If \begin{equation}
+    Mx=b,
+\end{equation}
+then every clause is satisfied.
+Equivalently, \begin{equation}
+    Mx-b=0.
+\end{equation}
+
+Hence
+
+\begin{equation}
+    \wt(Mx-b)=0.
+\end{equation}
+
+This is an exact d-LIN solution.
+
+Exact linear systems over $\F_2$ can be solved efficiently
+using Gaussian elimination. 
+
+% ============================================================
+\section{Hamming Weight and Violated Clauses}
+
+For a binary vector \begin{equation}
+v=(v_1,\ldots,v_m),
+\end{equation}
+
+its Hamming weight is \begin{equation}
+    \wt(v)=\left|\{i:v_i=1\}\right|.
+\end{equation}
+
+For example,\begin{equation}
+v=(0,1,0,1,1)
+\end{equation}
+has\begin{equation}
+    \wt(v)=3.
+\end{equation}
+Now consider\begin{equation}
+    Mx-b.
+\end{equation}
+For the $i$th clause, \begin{equation}
+    (Mx-b)_i=0
+\end{equation}
+
+means that the clause is satisfied, while
+
+\begin{equation}
+    (Mx-b)_i=1
+\end{equation} means that it is violated.
+
+Therefore, \textbf{\begin{equation}
+    \boxed{
+    \wt(Mx-b)
+    =
+    \text{number of violated clauses}.
+    }
+\end{equation}}
+
+% ============================================================
+\section{Almost Satisfiable d-LIN}
+
+An instance is called $(1-\epsilon)$-satisfiable if there exists an
+assignment $x$ such that
+
+\begin{equation}
+    \wt(Mx-b)\leq \epsilon m.
+    \label{eq:satisfiable}
+\end{equation}
+
+There are $m$ total clauses and at most $\epsilon m$ violated clauses.
+Hence at least
+
+\begin{equation}
+    m-\epsilon m
+    =
+    (1-\epsilon)m
+\end{equation}
+
+clauses are satisfied.
+
+The fraction satisfied is therefore at least
+
+\begin{equation}
+    \frac{(1-\epsilon)m}{m}
+    =
+    1-\epsilon.
+\end{equation}
+
+Thus,
+
+\begin{equation}
+    \boxed{
+    \wt(Mx-b)\leq\epsilon m
+    \iff
+    \text{at least }(1-\epsilon)\text{ of the clauses are satisfied}.
+    }
+\end{equation}
+
+For example, if $m=1000$ and $\epsilon=0.01$, then at most 10
+clauses are violated, and at least 990 are satisfied.
+
+% ============================================================
+\section{Bernoulli Noise}
+
+ABW09 considers a Bernoulli noise distribution denoted by : 
+    $\Ber_\epsilon^m$
+
+An error vector \begin{equation}
+    e=(e_1,\ldots,e_m)
+\end{equation}
+
+is sampled such that \begin{equation}
+    \Prob(e_i=1)=\epsilon
+\end{equation}
+and
+\begin{equation}
+    \Prob(e_i=0)=1-\epsilon.
+\end{equation}
+
+The bits are sampled independently.
+Thus, \begin{equation}
+    e_i\sim\Ber(\epsilon)
+\end{equation}
+
+independently for every $i$.
+
+The expected number of errors is
+
+\begin{equation}
+    \E[\wt(e)]
+    =
+    \sum_{i=1}^m\E[e_i]
+    =
+    m\epsilon.
+\end{equation}
+
+Therefore the expected fraction of corrupted equations is $\epsilon$.
+
+% ============================================================
+\section{Generating an Almost-Satisfiable Instance}
+
+A natural generation procedure is:
+
+\begin{enumerate}
+    \item Choose a random $d$-sparse matrix
+    \[
+        M\leftarrow M_{m,n,d}.
+    \]
+
+    \item Choose a uniformly random binary assignment
+    \[
+        x\leftarrow \U_n.
+    \]
+
+    \item Choose independent Bernoulli noise
+    \[
+        e\leftarrow\Ber_\epsilon^m.
+    \]
+
+    \item Publish
+    \[
+        \boxed{b=Mx+e}.
+    \]
+\end{enumerate}
+
+All operations are over $\F_2$.
+
+Without noise, $Mx$ belongs exactly to the set of valid right-hand
+sides generated by $M$. The noise moves it away from that set.
+
+% ============================================================
+\section{The Image of a Matrix}
+
+The image of $M$ is
+
+\begin{equation}
+    \Image(M)
+    =
+    \{Mx:x\in\F_2^n\}.
+\end{equation}
+
+Thus $\Image(M)$ is the set of all vectors that can be produced by
+multiplying $M$ by some binary vector $x$.
+
+For every assignment $x$,
+
+\begin{equation}
+    Mx\in\Image(M).
+\end{equation}
+
+Since
+
+\begin{equation}
+    b=Mx+e,
+\end{equation}
+
+the observed vector $b$ is obtained by taking one point in
+$\Image(M)$ and adding noise.
+
+% ------------------------------------------------------------
+\subsection{Distance from the Image}
+
+The Hamming distance between two binary vectors is
+
+\begin{equation}
+    d_H(u,v)
+    =
+    \wt(u-v).
+\end{equation}
+
+The distance of $b$ from the image of $M$ is
+
+\begin{equation}
+    d_H(b,\Image(M))
+    =
+    \min_{y\in\Image(M)}d_H(b,y).
+\end{equation}
+
+The construction
+
+\[
+b=Mx+e
+\]
+
+guarantees that $b$ is at distance at most $\wt(e)$ from the
+particular image point $Mx$:
+
+\begin{equation}
+    d_H(b,Mx)=\wt(e).
+\end{equation}
+
+Since
+
+\[
+\E[\wt(e)]=\epsilon m,
+\]
+
+the expected absolute distance is $\epsilon m$, or normalized by $m$,
+
+\begin{equation}
+    \boxed{
+    \text{expected relative distance}\approx\epsilon.
+    }
+\end{equation}
+
+% ============================================================
+\section{A Complete Numerical Example}
+\begin{equation}
+M=
+\begin{pmatrix}
+1&1&0&1&0\\
+0&1&1&0&1\\
+1&0&1&1&0\\
+0&1&0&1&1
+\end{pmatrix},
+\qquad
+b=
+\begin{pmatrix}
+1\\1\\0\\1
+\end{pmatrix}.
+\end{equation}
+Choose
+\begin{equation}
+x=
+\begin{pmatrix}
+1\\0\\1\\0\\1
+\end{pmatrix}.
+\end{equation}
+Then
+\begin{equation}
+Mx=
+\begin{pmatrix}
+1\\0\\0\\1
+\end{pmatrix}.
+\end{equation}
+
+Suppose
+
+\begin{equation}
+e=
+\begin{pmatrix}
+0\\1\\0\\0
+\end{pmatrix}.
+\end{equation}
+
+Then
+
+\begin{equation}
+b=Mx+e
+=
+\begin{pmatrix}
+1\\0\\0\\1
+\end{pmatrix}
++
+\begin{pmatrix}
+0\\1\\0\\0
+\end{pmatrix}
+=
+\begin{pmatrix}
+1\\1\\0\\1
+\end{pmatrix}.
+\end{equation}
+
+Thus
+
+\begin{equation}
+Mx-b
+=
+\begin{pmatrix}
+0\\1\\0\\0
+\end{pmatrix},
+\end{equation}
+
+and
+
+\begin{equation}
+\wt(Mx-b)=1.
+\end{equation}
+
+There are four clauses, so the assignment satisfies
+
+\begin{equation}
+    1-\frac14=\frac34
+\end{equation}
+
+of the clauses.
+
+Hence the instance is at least $3/4$-satisfiable.
+
+% ============================================================
+\section{Where Does the Hardness Come From?}
+
+It is important to distinguish three problems.
+
+\subsection{Exact linear system}
+
+\begin{equation}
+    Mx=b.
+\end{equation}
+
+This can be solved efficiently by Gaussian elimination over $\F_2$.
+
+Therefore:
+
+\begin{equation}
+    \boxed{\text{linear algebra itself is not hard}.}
+\end{equation}
+
+\subsection{Noisy system}
+
+The cryptographic problem is instead
+
+\begin{equation}
+    b=Mx+e.
+\end{equation}
+
+The attacker receives $(M,b)$ but not $x$ or $e$.
+
+The attacker must find an assignment that explains most of the
+observed equations.
+
+Equivalently, the task can be written approximately as\begin{equation}
+    \boxed{
+    \text{find }x\text{ such that }
+    d_H(Mx,b)\leq\epsilon m.
+    }
+\end{equation}
+This is a noisy constraint-satisfaction problem.
+\subsection{Unknown locations of the errors}
+The attacker does not know which equations are corrupted.
+
+For example, if
+\[
+m=1000,\qquad \epsilon=0.1,
+\]
+then approximately 100 equations are noisy, but their positions are
+unknown.
+
+The attacker must simultaneously infer the hidden assignment and
+cope with the unknown corrupted constraints.
+
+\subsection{Exponential assignment space}
+There are\begin{equation}
+    2^n
+\end{equation}
+possible binary assignments.
+Brute-force search therefore takes exponential time in $n$.
+
+The cryptographic assumption is that no known efficient algorithm can
+recover the hidden assignment, or otherwise exploit the generated
+instance, for the selected parameter regime.
+
+% ============================================================
+\section{What Exactly Is Assumed to Be Hard?}
+The statement should be phrased carefully.
+
+The assumption is not
+\begin{equation}
+    \text{d-LIN is mathematically proven to be hard}.
+\end{equation}
+Rather, it is a cryptographic hardness assumption of the form
+\begin{equation}
+\boxed{
+\begin{minipage}{0.85\textwidth}
+For appropriately chosen parameters, a random noisy sparse system
+\[
+b=Mx+e
+\]
+over $\F_2$ cannot be efficiently solved by a probabilistic
+polynomial-time algorithm.
+\end{minipage}}
+\end{equation}
+This is analogous in spirit to the way cryptography relies on
+assumptions such as LPN, LWE, and related problems.
+
+\textbf{ABW09 provides evidence against several classes of attacks, including \textcolor{red}{myopic attacks, low-degree polynomial approaches, $AC^0$ algorithms,and Lasserre/SDP-type methods}. Such evidence is not a proof that
+d-LIN is outside $\mathbf P$.}
+
+% ============================================================
+\section{Relation to LPN}
+
+Learning Parity with Noise (LPN) has the general form
+
+\begin{equation}
+    b=Ax+e
+    \pmod 2.
+\end{equation}
+
+This looks extremely similar to d-LIN.
+
+The main structural difference is that in d-LIN the matrix is
+explicitly sparse:\begin{equation}
+    \wt(M_i)=d
+\end{equation} for every row $M_i$.
+
+Thus, d-LIN can be viewed as a sparse noisy parity-learning regime.
+
+For $d=3$,
+
+\begin{equation}
+    x_i+x_j+x_k=b_\ell
+\end{equation}
+
+is a noisy 3-XOR constraint.
+
+The common structure is
+
+\begin{equation}
+    \boxed{\text{hidden linear relation}+\text{noise}.}
+\end{equation}
+
+The exact assumptions, parameter regimes, and known algorithms are
+nevertheless different.
+
+% ============================================================
+\section{Relation to LWE}
+
+The Learning With Errors problem has the form
+
+\begin{equation}
+    b=As+e\pmod q,
+\end{equation}
+
+where typically
+
+\begin{equation}
+    A\in\Z_q^{m\times n}.
+\end{equation}
+
+Compare:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+ & d-LIN & LWE\\
+\midrule
+Domain & $\F_2$ & $\Z_q$\\
+Matrix & sparse & generally random/dense\\
+Secret & binary $x$ & $s\in\Z_q^n$\\
+Noise & Bernoulli & small modular/integer noise\\
+Equation & $b=Mx+e$ & $b=As+e\pmod q$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The noiseless versions of both problems are easy linear algebra.
+The difficulty comes from the noisy version.
+
+However, d-LIN and LWE are not simply the same problem with different
+notation.
+
+% ============================================================
+\section{Relation to MLWE}
+
+Module-LWE introduces a module or polynomial-ring structure.
+
+A schematic MLWE equation is
+
+\begin{equation}
+    b=As+e
+\end{equation}
+
+over a ring such as
+
+\begin{equation}
+    R_q=\Z_q[X]/(f(X)).
+\end{equation}
+
+Thus:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Problem & Algebraic setting & Main structure\\
+\midrule
+d-LIN & $\F_2$ & sparse binary matrix\\
+LPN & $\F_2$ & noisy parity learning\\
+LWE & $\Z_q$ & modular linear equations\\
+MLWE & polynomial/module ring & structured modular equations\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+All share the high-level pattern
+
+\begin{equation}
+    \boxed{\text{recover hidden structure from noisy linear information}.}
+\end{equation}
+
+But their mathematical hardness assumptions are different.
+
+% ============================================================
+\section[Why Does ABW09 Use F2?]{Why Does ABW09 Use $\F_2$?}
+
+There is nothing mathematically inevitable about $\F_2$.
+One could define sparse noisy linear equations over a larger finite
+field $\F_q$.
+
+ABW09 chooses $\F_2$ for structural and conceptual reasons.
+
+\subsection{Boolean variables}
+
+Over $\F_2$,
+
+\begin{equation}
+    x_i\in\{0,1\}.
+\end{equation}
+
+Thus each equation is a Boolean parity constraint.
+
+For example,
+
+\begin{equation}
+    x_1+x_4+x_7=1
+\end{equation}
+
+is
+
+\begin{equation}
+    x_1\oplus x_4\oplus x_7=1.
+\end{equation}
+
+This makes the problem naturally combinatorial.
+
+\subsection{Clean interpretation of noise}
+
+A Bernoulli error bit has only two possibilities:
+
+\begin{equation}
+e_i=
+\begin{cases}
+0,&\text{equation unchanged},\\
+1,&\text{equation right-hand side flipped}.
+\end{cases}
+\end{equation}
+
+Thus
+
+\begin{equation}
+    b=Mx+e
+\end{equation}
+
+literally means that a small fraction of the parity equations have
+their output bit flipped.
+
+\subsection{Cancellation}
+
+The characteristic-two identity
+
+\begin{equation}
+    x+x=0
+\end{equation}
+
+gives especially clean cancellation.
+
+Suppose a subset $S$ of rows satisfies
+
+\begin{equation}
+    \sum_{i\in S}M_i=0.
+\end{equation}
+
+Then for
+
+\begin{equation}
+    b=Mx+e
+\end{equation}
+
+we obtain
+
+\begin{align}
+\sum_{i\in S}b_i
+&=
+\sum_{i\in S}(M_ix+e_i)\\
+&=
+\left(\sum_{i\in S}M_i\right)x
++
+\sum_{i\in S}e_i\\
+&=
+\sum_{i\in S}e_i.
+\end{align}
+
+The unknown $x$ cancels completely.
+
+This cancellation property is central to the hidden linear dependency
+used as a trapdoor in the ABW public-key construction.
+
+% ============================================================
+\section{Could We Use \texorpdfstring{$\F_q$}{Fq} Instead?}
+
+In principle, yes.
+
+One could define
+
+\begin{equation}
+    b=Mx+e\pmod q,
+\end{equation}
+
+with
+
+\begin{equation}
+    M\in\F_q^{m\times n}
+\end{equation}
+
+and sparse rows.
+
+However, this would define a different problem.
+
+Over $\F_2$:
+
+\begin{equation}
+    x_i+x_j+x_k=b
+\end{equation}
+
+is a Boolean XOR constraint.
+
+Over $\F_q$:
+
+\begin{equation}
+    x_i+x_j+x_k=b\pmod q
+\end{equation}
+
+is a constraint over $q$ possible values per variable.
+
+The reductions, combinatorial interpretation, noise distribution,
+parameter choices, and attack landscape can therefore change.
+
+Consequently, replacing $\F_2$ by $\F_q$ does not automatically produce
+``the same d-LIN problem but stronger.'' It creates a related but
+distinct hardness assumption.
+
+% ============================================================
+\section{Connection to the ABW09 Public-Key Construction}
+
+The sparse noisy linear assumption is not introduced merely as an
+abstract puzzle. ABW09 uses it to construct public-key encryption.
+
+The central relation remains
+
+\begin{equation}
+    b=Mx+e.
+\end{equation}
+
+The construction exploits a secret short linear dependency among
+rows of the public matrix:
+
+\begin{equation}
+    \sum_{i\in S}M_i=0.
+\end{equation}
+
+When the corresponding ciphertext components are summed, the
+unknown term involving $x$ disappears:
+
+\begin{equation}
+    \sum_{i\in S}b_i
+    =
+    \sum_{i\in S}e_i.
+\end{equation}
+
+The legitimate decryptor knows the hidden dependency $S$, while an
+attacker is not supposed to be able to exploit the public sparse
+system in the same way.
+
+This is the connection between the abstract d-LIN assumption and the
+cryptographic trapdoor construction.
+
+% ============================================================
+\section{Search and Decision Perspectives}
+
+A useful distinction is between a \emph{search} problem and a
+\emph{decision} problem.
+\subsection{Search} Given \begin{equation}
+    (M,b)
+\end{equation}
+generated according to \begin{equation}
+    b=Mx+e,
+\end{equation} recover the hidden $x$ or otherwise find an assignment explaining
+most of the equations.
+
+\subsection{Decision}
+
+A decision formulation asks whether a given sample is distributed
+like a valid noisy d-LIN instance or instead comes from some
+appropriate reference distribution.
+
+ABW09 develops reductions connecting search, approximate search,
+prediction, and distributional formulations in order to support the
+cryptographic construction.
+
+
+% ============================================================
+\section{What Makes d-LIN Hard? A Careful Statement}
+
+The safest conceptual statement is:
+\begin{equation}
+\boxed{
+\parbox{0.9\textwidth}{
+\centering % Optional: centers the text inside the box
+The assumed hardness comes from recovering a hidden assignment
+from random sparse equations whose outputs have been independently
+corrupted by noise.
+}}
+\end{equation}
+
+
+It is \emph{not} correct to say that ordinary linear algebra over
+$\F_2$ is hard.
+
+It is also not correct to say that ABW09 proves that d-LIN cannot be
+solved efficiently.
+
+The paper provides cryptographic assumptions and evidence against
+specific classes of algorithms. As with other cryptographic
+assumptions, security depends on the parameter regime and on the
+absence of efficient attacks.
+
+% ============================================================
+\section{A Useful Mental Model}
+
+The progression can be remembered as follows: \[
+\boxed{
+b=Mx
+}
+\] means:\[
+\text{exact linear equations}
+\quad\Longrightarrow\quad
+\text{easy by Gaussian elimination}.
+\]Add noise: \[
+\boxed{
+b=Mx+e
+}
+\] and now:
+\[
+\text{which equations are wrong?}
+\]
+becomes part of the problem. 
+Make $M$ sparse:
+\[
+\boxed{
+\operatorname{rowwt}(M)=d
+}
+\]
+and the equations become local parity constraints:
+\[
+x_{i_1}\oplus x_{i_2}\oplus\cdots\oplus x_{i_d}=b_j.
+\]
+Therefore the central picture is
+\[
+\boxed{
+\text{random sparse parity constraints}
++
+\text{random noise}
++
+\text{hidden assignment}.
+}
+\]
+
+% ============================================================
+\section{Summary Table}
+
+\begin{center}
+\begin{tabular}{p{0.22\textwidth}p{0.68\textwidth}}
+\toprule
+Symbol / Term & Meaning\\
+\midrule
+$m$ & Number of clauses/equations\\
+$n$ & Number of binary variables\\
+$d$ & Number of ones in every row of $M$\\
+$M$ & $m\times n$ sparse binary constraint matrix\\
+$x$ & Hidden $n$-bit assignment\\
+$b$ & Observed $m$-bit right-hand-side vector\\
+$e$ & Noise/error vector\\
+$\Ber_\epsilon^m$ & $m$ independent Bernoulli bits with $\Prob(e_i=1)=\epsilon$\\
+$\wt(v)$ & Hamming weight, i.e. number of ones in $v$\\
+$\Image(M)$ & Set $\{Mx:x\in\F_2^n\}$\\
+$\epsilon m$ & Expected number of corrupted clauses\\
+$1-\epsilon$ & Expected/guaranteed satisfiable fraction in the corresponding bound\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================
+\section{Key Equations to Remember}
+
+The most important equations are:
+
+\begin{align}
+    &\boxed{M\in\F_2^{m\times n}}
+    &&\text{binary constraint matrix},\\[4pt]
+    &\boxed{\wt(M_i)=d}
+    &&\text{$d$ ones per row},\\[4pt]
+    &\boxed{b=Mx+e}
+    &&\text{noisy d-LIN instance},\\[4pt]
+    &\boxed{\wt(Mx-b)}
+    &&\text{number of violated clauses},\\[4pt]
+    &\boxed{\wt(Mx-b)\leq\epsilon m}
+    &&\text{at least }1-\epsilon\text{ clauses satisfied},\\[4pt]
+    &\boxed{\Image(M)=\{Mx:x\in\F_2^n\}}
+    &&\text{all noiseless outputs},\\[4pt]
+    &\boxed{\E[\wt(e)]=\epsilon m}
+    &&\text{expected number of errors}.
+\end{align}
+
+The broader learning-with-noise comparison is:
+
+\begin{align}
+    \text{d-LIN:}\quad
+    &b=Mx+e\pmod2,
+    &&M\text{ sparse},\\
+    \text{LPN:}\quad
+    &b=Ax+e\pmod2,
+    &&A\text{ generally random binary},\\
+    \text{LWE:}\quad
+    &b=As+e\pmod q,
+    &&A\in\Z_q^{m\times n},\\
+    \text{MLWE:}\quad
+    &b=As+e,
+    &&A,s,e\text{ over a module/ring}.
+\end{align}
+
+The common high-level idea is:
+
+\[
+\boxed{
+\text{hidden linear structure}
++
+\text{noise}
+\longrightarrow
+\text{computational hardness assumption}.
+}
+\]
+
+\end{document}
