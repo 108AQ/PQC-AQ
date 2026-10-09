@@ -18,6 +18,7 @@ Resources and implementations focused on three topics: **Kyber**, **ML-KEM** and
 | `configs/` | Experiment configuration |
 | `docs/` | `technical`, `meeting-notes`, `project-plans`, `architecture` |
 | `literature/` | `bibliography.bib`, `reading-list.md`, `notes/` |
+| `my_notes/` | Personal study notes per topic (e.g. `my_notes/dLIN/`) |
 | `papers/manuscript/` | Manuscript sources |
 | `presentations/` | Slides |
 | `environment/` | `requirements*.txt`, `environment.yml` |
